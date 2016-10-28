@@ -26,29 +26,28 @@ public class PlayerController : MonoBehaviour
 	private float nextFire;
 
 	private bool InfAmmo;
-	private Timer infAmmoTimer;
 	public float infAmmoDur;
 	public float infAmmoDelay;
 	private float infAmmoNow;
+	private float infAmmoTime;
 	private bool shieldBonus;
 	public float shieldBonusDur;
 	private float shieldTime;
-	
+
 	public GameObject playerExplosion;
 	public GameController gameController;
-	
+
 	private void Start()
 	{
 		this.transform.Rotate(new Vector3(270, 180, 0));
 		InfAmmo = false;
-		infAmmoTimer = new Timer(1000* infAmmoDur);
-		infAmmoTimer.Elapsed += infAmmoTimer_Elapsed;
 		shieldBonus = false;
 		shieldTime = shieldBonusDur;
+		infAmmoTime = infAmmoDur;
 		HideShield();
 		gameController.UpdateLifesText(3);
 	}
-	
+
 	private void FixedUpdate()
 	{
 		float moveHorizontal = Input.GetAxis("Horizontal");
@@ -68,17 +67,6 @@ public class PlayerController : MonoBehaviour
 
 	private void Update()
 	{
-		if (shieldBonus)
-		{
-			shieldTime -= Time.fixedDeltaTime;
-		}
-		if (shieldTime <= 0 && shieldBonus)
-		{
-			shieldBonus = false;
-			HideShield();
-			shieldTime = shieldBonusDur;
-		}
-
 		if (Input.GetButton("Jump") && Time.time > nextFire)
 		{
 			if (gameController.CanShoot(cost))
@@ -90,31 +78,55 @@ public class PlayerController : MonoBehaviour
 		}
 		if (Input.GetKeyDown(KeyCode.E) && Time.time > nextFire)
 		{
-			if (gameController.CanShoot(cost*15))
+			if (gameController.CanShoot(cost * 15))
 			{
 				nextFire = Time.time + fireRate;
-				gameController.TakeScore(cost*15);
+				gameController.TakeScore(cost * 15);
 				Mine();
 			}
 		}
 		if (Input.GetKeyDown(KeyCode.Q) && Time.time > nextFire)
 		{
-			if (gameController.CanShoot(cost*10))
+			if (gameController.CanShoot(cost * 10))
 			{
 				nextFire = Time.time + fireRate;
-				gameController.TakeScore(cost*10);
+				gameController.TakeScore(cost * 10);
 				Rocket();
+			}
+		}
+
+		if (shieldBonus)
+		{
+			gameController.UpdateShieldPict(1-(shieldBonusDur - shieldTime) / shieldBonusDur);
+			shieldTime -= Time.fixedDeltaTime;
+			if (shieldTime <= 0)
+			{
+				shieldBonus = false;
+				HideShield();
+				shieldTime = shieldBonusDur;
+				gameController.UpdateShieldPict(0);
+			}
+		}
+		if (InfAmmo)
+		{
+			gameController.UpdateInfAmmoPict(1-(infAmmoDur - infAmmoTime) / infAmmoDur);
+			infAmmoTime -= Time.fixedDeltaTime;
+			if (infAmmoTime <= 0)
+			{
+				InfAmmo = false;
+				infAmmoTime = infAmmoDur;
+				gameController.UpdateInfAmmoPict(0);
 			}
 		}
 		if (InfAmmo && Time.time > infAmmoNow)
 		{
 			infAmmoNow = Time.time + infAmmoDelay;
-			switch (Random.Range(0,2))
+			switch (Random.Range(0, 2))
 			{
 				case 0:
-					Bullet(Random.Range(-30,30));
+					Bullet(Random.Range(-30, 30));
 					break;
-				case 1: 
+				case 1:
 					Rocket();
 					break;
 			}
@@ -159,27 +171,18 @@ public class PlayerController : MonoBehaviour
 
 	public void UseBonusInfAmmo()
 	{
+		gameController.UpdateInfAmmoPict(1);
 		if (InfAmmo)
-		{
-			infAmmoTimer.Stop();
-			infAmmoTimer.Start();
-		}
+			infAmmoTime = infAmmoDur;
 		else
 		{
 			InfAmmo = true;
-			infAmmoTimer.Start();
 		}
-	}
-
-
-	void infAmmoTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-	{
-		infAmmoTimer.Stop();
-		InfAmmo = false;
 	}
 
 	public void UseBonusShield()
 	{
+		gameController.UpdateShieldPict(1);
 		if (shieldBonus)
 		{
 			shieldTime = shieldBonusDur;
