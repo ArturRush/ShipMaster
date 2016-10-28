@@ -47,6 +47,8 @@ public class GameController : MonoBehaviour
 
 	public Text restartText;
 	public Text gameOverText;
+	public Text lvlText;
+	public Text lifesText;
 
 	private bool gameOver;
 	private bool restart;
@@ -58,7 +60,7 @@ public class GameController : MonoBehaviour
 	public float doublePointsDuration;
 	private Timer dPointsTimer;
 	private int lvl;
-
+	private string leadersFile = "Score.txt";
 
 	private List<Leaders> leaderBoard = new List<Leaders>();
 	void Start () {
@@ -71,12 +73,12 @@ public class GameController : MonoBehaviour
 
 		restartText.text = "";
 		gameOverText.text = "";
-		UpdateScore();
+		UpdateScoreText();
 		lvl = 1;
-		playerName = "Artur";
-		if (!File.Exists("ScoreAlfa.txt"))
-			File.WriteAllText("ScoreAlfa.txt", "");
-		string[] str = File.ReadAllLines("ScoreAlfa.txt");
+		UpdateLvlText();
+		if (!File.Exists(leadersFile))
+			File.WriteAllText(leadersFile, "");
+		string[] str = File.ReadAllLines(leadersFile);
 		foreach (var s in str)
 		{
 			Leaders temp = Leaders.Parse(s);
@@ -120,6 +122,7 @@ public class GameController : MonoBehaviour
 				yield return new WaitForSeconds(Random.Range(0.2f, Mathf.Max(0.2f, spawnWait - (lvl / 50))));
 			}
 			++lvl;
+			UpdateLvlText();
 			yield return new WaitForSeconds(waveWait);
 		}
 	}
@@ -151,7 +154,7 @@ public class GameController : MonoBehaviour
 		score += newScoreValue;
 		if (doublePoints)
 			score += newScoreValue;
-		UpdateScore();
+		UpdateScoreText();
 	}
 
 	public void TakeScore(int toTake)
@@ -159,7 +162,7 @@ public class GameController : MonoBehaviour
 		score -= toTake;
 		if (score < 0)
 			score = 0;
-		UpdateScore();
+		UpdateScoreText();
 	}
 
 	public bool CanShoot(int cost)
@@ -167,9 +170,19 @@ public class GameController : MonoBehaviour
 		return score - cost >= 0;
 	}
 
-	void UpdateScore()
+	void UpdateScoreText()
 	{
 		scoreText.text = "Score: " + score;
+	}
+
+	public void UpdateLifesText(int lifes)
+	{
+		lifesText.text = "Lifes: " + lifes;
+	}
+
+	void UpdateLvlText()
+	{
+		lvlText.text = "Level: " + lvl;
 	}
 
 	public void AddToLeaders()
@@ -183,7 +196,8 @@ public class GameController : MonoBehaviour
 			tmp[i] = leaderBoard[i].name + ' ' + leaderBoard[i].scorePts;
 			Debug.Log(leaderBoard[i].name + ' ' + leaderBoard[i].scorePts);
 		}
-		File.WriteAllLines("ScoreAlfa.txt", tmp);
+		File.WriteAllText(leadersFile,"");
+		File.WriteAllLines(leadersFile, tmp);
 	}
 
 	public void UseBonusDoublePoints()

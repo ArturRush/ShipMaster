@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
 	public GameObject shield;
 	public Transform shotSpawn;
 	public float fireRate;
+	public int lifes;
 	private float nextFire;
 
 	private bool InfAmmo;
@@ -35,7 +36,7 @@ public class PlayerController : MonoBehaviour
 	
 	public GameObject playerExplosion;
 	public GameController gameController;
-
+	
 	private void Start()
 	{
 		this.transform.Rotate(new Vector3(270, 180, 0));
@@ -45,6 +46,7 @@ public class PlayerController : MonoBehaviour
 		shieldBonus = false;
 		shieldTime = shieldBonusDur;
 		HideShield();
+		gameController.UpdateLifesText(3);
 	}
 	
 	private void FixedUpdate()
@@ -144,9 +146,14 @@ public class PlayerController : MonoBehaviour
 	{
 		if (!shieldBonus && (other.CompareTag("Explosion") || other.CompareTag("EnemyShip") || other.CompareTag("EnemyRocket") || other.CompareTag("Shark") || other.CompareTag("EnemyMine")))
 		{
+			--lifes;
+			gameController.UpdateLifesText(lifes);
 			Instantiate(playerExplosion, transform.position, transform.rotation);
-			gameController.GameOver();
-			Destroy(gameObject);
+			if (lifes < 1)
+			{
+				gameController.GameOver();
+				Destroy(gameObject);
+			}
 		}
 	}
 
