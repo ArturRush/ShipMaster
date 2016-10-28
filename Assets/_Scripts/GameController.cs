@@ -104,9 +104,16 @@ public class GameController : MonoBehaviour
 		yield return new WaitForSeconds(startWait);
 		while (true)
 		{
-			for (int i = 0; i < lvl * hazardCount; ++i)
+			Debug.Log("Текущий уровень:" + lvl);
+			for (int i = 0; i < Mathf.Max(4, (int)(0.5* lvl * hazardCount)); ++i)
 			{
-				GameObject hazard = hazards[Random.Range(0, hazards.Length)];
+				GameObject hazard = null;
+				if(lvl<2)
+					hazard = hazards[0];	//Акулы
+				else if(lvl<5)
+					hazard = hazards[Random.Range(0, 2)];//Акулы и мины
+				else
+					hazard = hazards[Random.Range(0, hazards.Length)];//Появляются катера
 				Vector3 spawnPosition = new Vector3(Random.Range(-spawnPos.x, spawnPos.x), spawnPos.y, spawnPos.z);
 				Quaternion spawnRotation = Quaternion.identity;
 				Instantiate(hazard, spawnPosition, spawnRotation);

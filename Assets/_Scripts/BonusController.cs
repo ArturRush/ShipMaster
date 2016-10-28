@@ -45,7 +45,7 @@ public class BonusController : MonoBehaviour
 					break;
 				case "MegaMine(Clone)":
 					{
-						gameController.UseBonusMegaMine(); ;
+						gameController.UseBonusMegaMine();
 					}
 					break;
 				case "RocketStrike(Clone)":
