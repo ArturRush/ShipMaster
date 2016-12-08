@@ -19,7 +19,7 @@ public struct Leaders
 		try
 		{
 			string[] tmp = line.Split(' ');
-			return new Leaders { name = tmp[0], scorePts = int.Parse(tmp[1]) , level = Int32.Parse(tmp[2].Trim('('))};
+			return new Leaders { name = tmp[0], scorePts = int.Parse(tmp[1]), level = Int32.Parse(tmp[2].Trim('(')) };
 		}
 		catch
 		{
@@ -49,7 +49,7 @@ public class GameController : MonoBehaviour
 	public float scoreMultiplier;//На это значение умножается номер уровня и добавляется к каждому полученному очку
 
 	public Text restartText;
-	public Text gameOverText;
+	//public Text gameOverText;
 	public Text lvlText;
 	public Text lifesText;
 	public Image shieldBonusImg;
@@ -62,13 +62,15 @@ public class GameController : MonoBehaviour
 	public GameObject megaMine;
 	public GameObject rocket;
 
+	public GameObject goPanel;
+	public GameObject canvas;
+
 	private bool doublePoints;
 	public float doublePointsDuration;
 	private int lvl;
 	private string leadersFile = "Score.txt";
 
-	private List<int> hazardProbability;
-	private List<int> bonusProbability;
+	private List<float> hazardProbability = new List<float>();
 
 	private List<Leaders> leaderBoard = new List<Leaders>();
 	void Start()
@@ -83,7 +85,7 @@ public class GameController : MonoBehaviour
 		shieldBonusImg.fillAmount = 0;
 		infAmmoBonusImg.fillAmount = 0;
 		restartText.text = "";
-		gameOverText.text = "";
+		//gameOverText.text = "";
 		UpdateScoreText();
 		lvl = 1;
 		UpdateLvlText();
@@ -95,18 +97,24 @@ public class GameController : MonoBehaviour
 			Leaders temp = Leaders.Parse(s);
 			leaderBoard.Add(temp);
 		}
+
+		hazardProbability.Add(1);
+		hazardProbability.Add(0);
+		hazardProbability.Add(0);
 	}
 
 	void Update()
 	{
-		if (restart && Input.GetKeyDown(KeyCode.R))
-		{
-			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-		}
+		//if (restart && Input.GetKeyDown(KeyCode.R))
+		//{
+		//	SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+		//}
 		if (gameOver)
 		{
-			restartText.text = "Press 'R' to restart game";
-			restart = true;
+			//restartText.text = "Press 'R' to restart game";
+			//restart = true;
+			gameOver = false;
+			Instantiate(goPanel, new Vector3(canvas.transform.position.x, 0, 0), new Quaternion(0,0,0,0),canvas.transform);
 		}
 		if (doublePoints)
 		{
@@ -124,16 +132,33 @@ public class GameController : MonoBehaviour
 			for (int i = 0; i < Mathf.Max(4, (int)(0.5 * lvl * hazardCount)); ++i)
 			{
 				GameObject hazard = null;
-				if (lvl < 2)
-					hazard = hazards[0];	//Акулы
-				else if (lvl < 5)
-					hazard = hazards[Random.Range(0, 2)];//Акулы и мины
-				else
-					hazard = hazards[Random.Range(0, hazards.Length)];//Появляются катера
-				Vector3 spawnPosition = new Vector3(Random.Range(-spawnPos.x, spawnPos.x), spawnPos.y, spawnPos.z);
+				float r = Random.value;
+				if (r < hazardProbability[0])//Акулы
+					hazard = hazards[0];
+				if (hazardProbability[0] <= r && r < hazardProbability[1] + hazardProbability[0])//Мины
+					hazard = hazards[1];
+				if (hazardProbability[1] + hazardProbability[0] <= r)//Катера
+					hazard = hazards[2];
+				if (hazard == null) yield return new WaitForSeconds(Random.Range(0.2f, Mathf.Max(0.2f, spawnWait - (lvl / 50))));
+				Vector3 spawnPosition = new Vector3(Random.Range(-spawnPos.x, spawnPos.x), hazard == hazards[0] ? spawnPos.y - 0.2f : spawnPos.y, spawnPos.z);
 				Quaternion spawnRotation = Quaternion.identity;
 				Instantiate(hazard, spawnPosition, spawnRotation);
 				yield return new WaitForSeconds(Random.Range(0.2f, Mathf.Max(0.2f, spawnWait - (lvl / 50))));
+			}
+			//Увеличение сложности с повышением уровня
+			//После 30 уровня сложность постоянна
+			//Дойти до 30 уровня - сложно
+			if (lvl < 20)
+			{
+				hazardProbability[0] -= 0.03f;
+				hazardProbability[1] += 0.02f;
+				hazardProbability[2] += 0.01f;
+			}
+			if (lvl >= 20 && lvl < 30)
+			{
+				hazardProbability[0] -= 0.01f;
+				hazardProbability[1] -= 0.01f;
+				hazardProbability[2] += 0.02f;
 			}
 			++lvl;
 			UpdateLvlText();
@@ -156,7 +181,7 @@ public class GameController : MonoBehaviour
 
 	public void GameOver()
 	{
-		gameOverText.text = "GAME OVER!";
+		//gameOverText.text = "GAME OVER!";
 		gameOver = true;
 		AddToLeaders();
 	}
@@ -165,7 +190,7 @@ public class GameController : MonoBehaviour
 	{
 		if (gameOver)
 			return;
-		score += newScoreValue + lvl*scoreMultiplier*newScoreValue;
+		score += newScoreValue + lvl * scoreMultiplier * newScoreValue;
 		if (doublePoints)
 			score += newScoreValue + lvl * scoreMultiplier * newScoreValue;
 		UpdateScoreText();
@@ -211,14 +236,14 @@ public class GameController : MonoBehaviour
 
 	public void AddToLeaders()
 	{
-		leaderBoard.Add(new Leaders() { name = playerName, scorePts = (int)score , level = lvl});
+		leaderBoard.Add(new Leaders() { name = playerName, scorePts = (int)score, level = lvl });
 		leaderBoard = leaderBoard.OrderByDescending(x => x.scorePts).ToList();
 		string[] tmp = new string[leaderBoard.Count];
 		Debug.Log("============Leaders============");
 		for (int i = 0; i < Mathf.Min(10, leaderBoard.Count); ++i)
 		{
-			tmp[i] = leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " уровень)";
-			Debug.Log(leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " уровень)");
+			tmp[i] = leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " волна)";
+			Debug.Log(leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " волна)");
 		}
 		File.WriteAllText(leadersFile, "");
 		File.WriteAllLines(leadersFile, tmp);

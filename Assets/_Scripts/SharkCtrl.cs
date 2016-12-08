@@ -29,13 +29,8 @@ public class SharkCtrl : MonoBehaviour
 		{
 			player = playerTemp.GetComponent<Transform>();
 		}
-		else
-		{
-			Debug.Log("Cannot find player");
-		}
 	}
 
-	// Update is called once per frame
 	void Update()
 	{
 		try
