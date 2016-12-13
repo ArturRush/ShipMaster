@@ -23,6 +23,10 @@ public class MineCtrl : MonoBehaviour
 		{
 			Debug.Log("Cannot find GameController");
 		}
+		if (CompareTag("PlayerMine"))
+		{
+			GetComponent<AudioSource>().Play();
+		}
 	}
 
 	void OnTriggerEnter(Collider other)

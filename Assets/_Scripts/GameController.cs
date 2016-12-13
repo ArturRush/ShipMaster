@@ -57,13 +57,17 @@ public class GameController : MonoBehaviour
 	public Image infAmmoBonusImg;
 
 	private bool gameOver;
-	private bool restart;
 
 	public GameObject megaMine;
 	public GameObject rocket;
 
 	public GameObject goPanel;
 	public GameObject canvas;
+
+	public AudioClip bonusClip;
+
+	public GameObject PauseBtn;
+	public GameObject PausePanel;
 
 	private bool doublePoints;
 	public float doublePointsDuration;
@@ -78,7 +82,6 @@ public class GameController : MonoBehaviour
 		StartCoroutine(SpawnWaves());
 		StartCoroutine(SpawnBonuses());
 		gameOver = false;
-		restart = false;
 
 		doublePoints = false;
 		doublePtsBonusImg.fillAmount = 0;
@@ -105,16 +108,11 @@ public class GameController : MonoBehaviour
 
 	void Update()
 	{
-		//if (restart && Input.GetKeyDown(KeyCode.R))
-		//{
-		//	SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-		//}
 		if (gameOver)
 		{
-			//restartText.text = "Press 'R' to restart game";
-			//restart = true;
 			gameOver = false;
 			Instantiate(goPanel, new Vector3(canvas.transform.position.x, 0, 0), new Quaternion(0,0,0,0),canvas.transform);
+			DisablePause();
 		}
 		if (doublePoints)
 		{
@@ -181,9 +179,8 @@ public class GameController : MonoBehaviour
 
 	public void GameOver()
 	{
-		//gameOverText.text = "GAME OVER!";
 		gameOver = true;
-		AddToLeaders();
+		//AddToLeaders();
 	}
 
 	public void AddScore(int newScoreValue)
@@ -239,11 +236,11 @@ public class GameController : MonoBehaviour
 		leaderBoard.Add(new Leaders() { name = playerName, scorePts = (int)score, level = lvl });
 		leaderBoard = leaderBoard.OrderByDescending(x => x.scorePts).ToList();
 		string[] tmp = new string[leaderBoard.Count];
-		Debug.Log("============Leaders============");
+		//Debug.Log("============Leaders============");
 		for (int i = 0; i < Mathf.Min(10, leaderBoard.Count); ++i)
 		{
 			tmp[i] = leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " волна)";
-			Debug.Log(leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " волна)");
+			//Debug.Log(leaderBoard[i].name + ' ' + leaderBoard[i].scorePts + " (" + leaderBoard[i].level + " волна)");
 		}
 		File.WriteAllText(leadersFile, "");
 		File.WriteAllLines(leadersFile, tmp);
@@ -251,17 +248,20 @@ public class GameController : MonoBehaviour
 
 	public void UseBonusDoublePoints()
 	{
+		GetComponent<AudioSource>().PlayOneShot(bonusClip);
 		doublePtsBonusImg.fillAmount = 1;
 		doublePoints = true;
 	}
 
 	public void UseBonusMegaMine()
 	{
+		GetComponent<AudioSource>().PlayOneShot(bonusClip);
 		Instantiate(megaMine, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
 	}
 
 	public void UseBonusRocketStrike()
 	{
+		GetComponent<AudioSource>().PlayOneShot(bonusClip);
 		for (float i = -3.8f; i <= 4.2f; i += 1.2f)
 		{
 			Instantiate(rocket, new Vector3(i, spawnPos.y, -7.0f),
@@ -272,5 +272,11 @@ public class GameController : MonoBehaviour
 			Instantiate(rocket, new Vector3(i, spawnPos.y, 7.0f),
 				Quaternion.Euler(0, 180, 0));
 		}
+	}
+
+	private void DisablePause()
+	{
+		PauseBtn.SetActive(false);
+		PausePanel.SetActive(false);
 	}
 }

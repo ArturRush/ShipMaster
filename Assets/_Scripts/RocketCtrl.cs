@@ -21,6 +21,7 @@ public class RocketCtrl : MonoBehaviour
 		{
 			Debug.Log("Cannot find GameController");
 		}
+		GetComponent<AudioSource>().Play();
 	}
 
 	void Update()

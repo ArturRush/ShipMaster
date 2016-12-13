@@ -34,6 +34,8 @@ public class PlayerController : MonoBehaviour
 	public float shieldBonusDur;
 	private float shieldTime;
 
+	public AudioClip bonusClip;
+	public AudioClip bulletShotClip;
 	public GameObject playerExplosion;
 	public GameController gameController;
 
@@ -135,23 +137,21 @@ public class PlayerController : MonoBehaviour
 
 	public void Bullet(float direction = 0)
 	{
+		GetComponent<AudioSource>().PlayOneShot(bulletShotClip);
 		Instantiate(bullet, shotSpawn.position,
 			Quaternion.Euler(shotSpawn.rotation.x, shotSpawn.rotation.y + direction, shotSpawn.rotation.z));
-		//GetComponent<AudioSource>().Play();
 	}
 
 	public void Mine(float direction = 0)
 	{
 		Instantiate(mine, shotSpawn.position,
 			Quaternion.Euler(shotSpawn.rotation.x, shotSpawn.rotation.y + direction, shotSpawn.rotation.z));
-		//GetComponent<AudioSource>().Play();
 	}
 
 	public void Rocket(float direction = 0)
 	{
 		Instantiate(rocket, shotSpawn.position,
 			Quaternion.Euler(shotSpawn.rotation.x, shotSpawn.rotation.y + direction, shotSpawn.rotation.z));
-		//GetComponent<AudioSource>().Play();
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -171,6 +171,7 @@ public class PlayerController : MonoBehaviour
 
 	public void UseBonusInfAmmo()
 	{
+		GetComponent<AudioSource>().PlayOneShot(bonusClip);
 		gameController.UpdateInfAmmoPict(1);
 		if (InfAmmo)
 			infAmmoTime = infAmmoDur;
@@ -182,6 +183,7 @@ public class PlayerController : MonoBehaviour
 
 	public void UseBonusShield()
 	{
+		GetComponent<AudioSource>().PlayOneShot(bonusClip);
 		gameController.UpdateShieldPict(1);
 		if (shieldBonus)
 		{
