@@ -31,7 +31,7 @@ public class menuScript : MonoBehaviour
 	public void ToMainMenuClick()
 	{
 		SaveRecord();
-		SceneManager.LoadScene(1);//Индекс сцены главного меню
+		SceneManager.LoadScene(0);//Индекс сцены главного меню
 	}
 
 	public void ExitGame()

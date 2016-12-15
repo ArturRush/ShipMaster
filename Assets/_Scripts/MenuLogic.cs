@@ -28,7 +28,7 @@ public class MenuLogic : MonoBehaviour
 
 	public void NewGameClick()
 	{
-		SceneManager.LoadScene(0);//0 - индекс сцены с игрой
+		SceneManager.LoadScene(1);//1 - индекс сцены с игрой
 	}
 
 	public void RecordsClick(GameObject recPanel)

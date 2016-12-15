@@ -5,9 +5,29 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenuScript : MonoBehaviour
 {
-	public void ContinuClick()
+	private bool pause = false;
+	private int counter = 30;
+	void Update()
+	{
+		if (counter > -2) counter--;
+		if (Input.GetKey(KeyCode.Escape) && counter <= 0)
+		{
+			counter = 30;
+			if (pause)
+			{
+				ContinueClick();
+			}
+			else
+			{
+				OpenPausePanelClick();
+			}
+		}
+	}
+
+	public void ContinueClick()
 	{
 		GetComponent<RectTransform>().anchoredPosition = new Vector2(1000,0);
+		pause = false;
 	}
 
 	public void RestartGame()
@@ -17,7 +37,7 @@ public class PauseMenuScript : MonoBehaviour
 	
 	public void ToMainMenuClick()
 	{
-		SceneManager.LoadScene(1);//Индекс сцены главного меню
+		SceneManager.LoadScene(0);//Индекс сцены главного меню
 	}
 
 	public void ExitGame()
@@ -28,5 +48,6 @@ public class PauseMenuScript : MonoBehaviour
 	public void OpenPausePanelClick()
 	{
 		GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+		pause = true;
 	}
 }
